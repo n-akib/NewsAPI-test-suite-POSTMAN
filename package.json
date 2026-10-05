@@ -1,0 +1,25 @@
+{
+  "name": "newsapi-automated-tests",
+  "version": "1.0.0",
+  "description": "Automated REST API test suite for NewsAPI v2 using Postman and Newman CLI",
+  "main": "index.js",
+  "scripts": {
+    "test": "newman run \"News API.postman_collection.json\" -e \"News API.postman_environment.json\" --reporters cli",
+    "test:report": "newman run \"News API.postman_collection.json\" -e \"News API.postman_environment.json\" --reporters cli,htmlextra --reporter-htmlextra-export ./newman/newsapi-test-report.html"
+  },
+  "keywords": [
+    "postman",
+    "newman",
+    "api-testing",
+    "test-automation",
+    "qa",
+    "newsapi",
+    "rest-api"
+  ],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "newman": "^6.2.1",
+    "newman-reporter-htmlextra": "^1.23.1"
+  }
+}

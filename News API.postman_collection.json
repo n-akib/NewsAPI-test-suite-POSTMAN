@@ -1,0 +1,312 @@
+{
+  "info": {
+    "_postman_id": "65bbf431-1dfa-4556-a996-35493f993b73",
+    "name": "News API Automation Test Suite",
+    "description": "Automated API test suite for NewsAPI v2 endpoints covering positive queries, negative scenarios, authentication mechanisms, and schema validations.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "31176349",
+    "_collection_link": "https://go.postman.co/collection/31176349-65bbf431-1dfa-4556-a996-35493f993b73?source=collection_link"
+  },
+  "item": [
+    {
+      "name": "NA-01 Search articles - valid",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));\npm.test(\"Content-Type is JSON\", () => pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\"));\npm.test(\"Response time recorded (observation only)\", () => console.log(\"Time ms:\", pm.response.responseTime));\nconst j = pm.response.json();\npm.test(\"status is ok\", () => pm.expect(j.status).to.eql(\"ok\"));\npm.test(\"totalResults is non-negative number\", () => { pm.expect(j.totalResults).to.be.a(\"number\"); pm.expect(j.totalResults).to.be.at.least(0); });\npm.test(\"articles is an array\", () => pm.expect(j.articles).to.be.an(\"array\"));\npm.test(\"Article fields have expected types (if any returned)\", () => { j.articles.forEach(a => { pm.expect(a.title).to.be.a(\"string\"); pm.expect(a.url).to.be.a(\"string\").and.match(/^https?:\\/\\//); pm.expect(a.publishedAt).to.be.a(\"string\"); }); });"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{newsBaseUrl}}/everything?q=technology&pageSize=5",
+          "host": [
+            "{{newsBaseUrl}}"
+          ],
+          "path": [
+            "everything"
+          ],
+          "query": [
+            {
+              "key": "q",
+              "value": "technology"
+            },
+            {
+              "key": "pageSize",
+              "value": "5"
+            }
+          ]
+        },
+        "description": "Positive. Collection-level X-Api-Key auth."
+      },
+      "response": []
+    },
+    {
+      "name": "NA-02 Top headlines - valid (country=us)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));\npm.test(\"Content-Type is JSON\", () => pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\"));\npm.test(\"Response time recorded (observation only)\", () => console.log(\"Time ms:\", pm.response.responseTime));\nconst j = pm.response.json();\npm.test(\"status is ok\", () => pm.expect(j.status).to.eql(\"ok\"));\npm.test(\"totalResults is non-negative number\", () => { pm.expect(j.totalResults).to.be.a(\"number\"); pm.expect(j.totalResults).to.be.at.least(0); });\npm.test(\"articles is an array\", () => pm.expect(j.articles).to.be.an(\"array\"));\npm.test(\"Article fields have expected types (if any returned)\", () => { j.articles.forEach(a => { pm.expect(a.title).to.be.a(\"string\"); pm.expect(a.url).to.be.a(\"string\").and.match(/^https?:\\/\\//); pm.expect(a.publishedAt).to.be.a(\"string\"); }); });"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{newsBaseUrl}}/top-headlines?country=us&pageSize=5",
+          "host": [
+            "{{newsBaseUrl}}"
+          ],
+          "path": [
+            "top-headlines"
+          ],
+          "query": [
+            {
+              "key": "country",
+              "value": "us"
+            },
+            {
+              "key": "pageSize",
+              "value": "5"
+            }
+          ]
+        },
+        "description": "Uses country only; country and sources cannot be mixed per docs."
+      },
+      "response": []
+    },
+    {
+      "name": "NA-03 Missing API key (negative)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status is 401\", () => pm.response.to.have.status(401));\npm.test(\"Content-Type is JSON\", () => pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\"));\npm.test(\"Response time recorded (observation only)\", () => console.log(\"Time ms:\", pm.response.responseTime));\nconst j = pm.response.json();\npm.test(\"Body status is error\", () => pm.expect(j.status).to.eql(\"error\"));\npm.test(\"Error has code and message\", () => { pm.expect(j.code).to.be.a(\"string\").and.not.empty; pm.expect(j.message).to.be.a(\"string\").and.not.empty; });\npm.test(\"Documented error code: apiKeyMissing\", () => pm.expect(j.code).to.eql(\"apiKeyMissing\"));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "noauth"
+        },
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{newsBaseUrl}}/everything?q=technology",
+          "host": [
+            "{{newsBaseUrl}}"
+          ],
+          "path": [
+            "everything"
+          ],
+          "query": [
+            {
+              "key": "q",
+              "value": "technology"
+            }
+          ]
+        },
+        "description": "Negative: authentication omitted; expect 401 apiKeyMissing."
+      },
+      "response": []
+    },
+    {
+      "name": "NA-04 Invalid API key (negative)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status is 401\", () => pm.response.to.have.status(401));\npm.test(\"Content-Type is JSON\", () => pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\"));\npm.test(\"Response time recorded (observation only)\", () => console.log(\"Time ms:\", pm.response.responseTime));\nconst j = pm.response.json();\npm.test(\"Body status is error\", () => pm.expect(j.status).to.eql(\"error\"));\npm.test(\"Error has code and message\", () => { pm.expect(j.code).to.be.a(\"string\").and.not.empty; pm.expect(j.message).to.be.a(\"string\").and.not.empty; });\npm.test(\"Documented error code: apiKeyInvalid\", () => pm.expect(j.code).to.eql(\"apiKeyInvalid\"));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "apikey",
+          "apikey": [
+            {
+              "key": "key",
+              "value": "X-Api-Key",
+              "type": "string"
+            },
+            {
+              "key": "value",
+              "value": "{{auth_secret_15dl}}",
+              "type": "string"
+            },
+            {
+              "key": "in",
+              "value": "header",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{newsBaseUrl}}/everything?q=technology",
+          "host": [
+            "{{newsBaseUrl}}"
+          ],
+          "path": [
+            "everything"
+          ],
+          "query": [
+            {
+              "key": "q",
+              "value": "technology"
+            }
+          ]
+        },
+        "description": "Negative: clearly fake key."
+      },
+      "response": []
+    },
+    {
+      "name": "NA-05 Missing required param q (negative)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status is 400\", () => pm.response.to.have.status(400));\npm.test(\"Content-Type is JSON\", () => pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\"));\npm.test(\"Response time recorded (observation only)\", () => console.log(\"Time ms:\", pm.response.responseTime));\nconst j = pm.response.json();\npm.test(\"Body status is error\", () => pm.expect(j.status).to.eql(\"error\"));\npm.test(\"Error has code and message\", () => { pm.expect(j.code).to.be.a(\"string\").and.not.empty; pm.expect(j.message).to.be.a(\"string\").and.not.empty; });\npm.test(\"Documented error code: parametersMissing\", () => pm.expect(j.code).to.eql(\"parametersMissing\"));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{newsBaseUrl}}/everything",
+          "host": [
+            "{{newsBaseUrl}}"
+          ],
+          "path": [
+            "everything"
+          ]
+        },
+        "description": "Valid key, no q/sources/domains."
+      },
+      "response": []
+    },
+    {
+      "name": "NA-06 Invalid sortBy value (negative)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status is 400\", () => pm.response.to.have.status(400));\npm.test(\"Content-Type is JSON\", () => pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\"));\npm.test(\"Response time recorded (observation only)\", () => console.log(\"Time ms:\", pm.response.responseTime));\nconst j = pm.response.json();\npm.test(\"Body status is error\", () => pm.expect(j.status).to.eql(\"error\"));\npm.test(\"Error has code and message\", () => { pm.expect(j.code).to.be.a(\"string\").and.not.empty; pm.expect(j.message).to.be.a(\"string\").and.not.empty; });"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{newsBaseUrl}}/everything?q=technology&sortBy=invalidSort",
+          "host": [
+            "{{newsBaseUrl}}"
+          ],
+          "path": [
+            "everything"
+          ],
+          "query": [
+            {
+              "key": "q",
+              "value": "technology"
+            },
+            {
+              "key": "sortBy",
+              "value": "invalidSort"
+            }
+          ]
+        },
+        "description": "Expected 400 + error body. Exact code is an assumption (docs list parameterInvalid) - recorded, not forced."
+      },
+      "response": []
+    },
+    {
+      "name": "NA-07 Top headlines sources",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));\npm.test(\"Content-Type is JSON\", () => pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\"));\npm.test(\"Response time recorded (observation only)\", () => console.log(\"Time ms:\", pm.response.responseTime));\nconst j = pm.response.json();\npm.test(\"status ok\", () => pm.expect(j.status).to.eql(\"ok\"));\npm.test(\"sources is array with id/name\", () => { pm.expect(j.sources).to.be.an(\"array\"); j.sources.forEach(s => { pm.expect(s.id).to.be.a(\"string\"); pm.expect(s.name).to.be.a(\"string\"); }); });"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{newsBaseUrl}}/top-headlines/sources?language=en",
+          "host": [
+            "{{newsBaseUrl}}"
+          ],
+          "path": [
+            "top-headlines",
+            "sources"
+          ],
+          "query": [
+            {
+              "key": "language",
+              "value": "en"
+            }
+          ]
+        }
+      },
+      "response": []
+    }
+  ],
+  "auth": {
+    "type": "apikey",
+    "apikey": [
+      {
+        "key": "key",
+        "value": "X-Api-Key",
+        "type": "string"
+      },
+      {
+        "key": "value",
+        "value": "{{newsApiKey}}",
+        "type": "string"
+      },
+      {
+        "key": "in",
+        "value": "header",
+        "type": "string"
+      }
+    ]
+  },
+  "variable": [
+    {
+      "key": "auth_secret_15dl",
+      "secret": true
+    }
+  ]
+}

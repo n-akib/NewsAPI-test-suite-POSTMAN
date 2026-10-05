@@ -1,0 +1,39 @@
+name: NewsAPI Automated Tests
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install Dependencies
+        run: npm ci || npm install
+
+      - name: Run Newman Test Suite
+        env:
+          NEWS_API_KEY: ${{ secrets.NEWS_API_KEY }}
+        run: |
+          npm run test:report -- --env-var "newsApiKey=${NEWS_API_KEY}"
+
+      - name: Upload Test Report Artifact
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: newman-html-report
+          path: newman/
+          retention-days: 14
